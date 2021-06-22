@@ -1,0 +1,82 @@
+class Solution(object):
+#M1
+  def connect(self, root):
+        """
+        :type root: Node
+        :rtype: Node
+        """
+        if not root:
+            return root
+        q = collections.deque([root])
+        while q:
+            size = len(q)
+            for i in range (size):
+                node = q.popleft()
+                if i < size - 1:
+                    node.next = q[0]
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+        return root
+
+#M2
+    def connectTwo(self, root):
+        """
+        :type root: Node
+        :rtype: Node
+        """
+        if not root:
+            return root
+        if root.left and root.right:
+            root.left.next = root.right
+        if (root.left or root.right) and root.next:
+            start = root.left
+            if root.right:
+                start  = root.right
+            nxt = root.next
+            end = None
+            while not end and nxt:
+                if nxt.right:
+                    end = nxt.right
+                if nxt.left:
+                    end = nxt.left
+                nxt = nxt.next
+            if end and start:
+                start.next = end
+        if root.right:
+            self.connect(root.right)
+        if root.left:
+            self.connect(root.left)
+        return root
+        
+#M3
+    def processChild(self, root, prev, leftmost):
+        if root:
+            #如果有prev，就把prev跟它连上，并且更新prev
+            #如果没有 leftmost，这个就是leftmost
+            if prev:
+                prev.next = root
+            prev = root
+            if not leftmost:
+                leftmost  = root
+        return prev, leftmost
+    
+    def connectThree(self, root):
+        """
+        :type root: Node
+        :rtype: Node
+        """
+        if not root:
+            return root
+        leftmost = root
+        while leftmost:
+            cur = leftmost #本层处理的起点
+            prev = None #下层连接的起点
+            leftmost = None #下一轮的起点，最左边那个，前置清空
+            while cur:
+                prev, leftmost = self.processChild(cur.left, prev, leftmost)#这里不能笔误是root，是最当前的cur
+                prev, leftmost = self.processChild(cur.right, prev, leftmost)
+                cur = cur.next
+        return root
+                
