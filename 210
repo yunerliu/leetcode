@@ -1,0 +1,57 @@
+class Solution:
+    def findOrderBfs(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        course_dict = collections.defaultdict(list)
+        indegree = [0] * numCourses
+        result = []
+        for cur, pre in prerequisites:
+            course_dict[pre].append(cur)
+            indegree[cur] += 1
+        queue = collections.deque()
+        for i in range(numCourses):
+            if indegree[i] == 0:
+                queue.append(i)
+                result.append(i)
+        while queue:
+            cur = queue.popleft()
+            for next_course in course_dict[cur]:
+                indegree[next_course] -= 1
+                if indegree[next_course] == 0:
+                    queue.append(next_course)
+                    result.append(next_course)
+        if len(result) == numCourses:
+            return result
+        return []
+ 
+    WHITE = 1#定义全局变量
+    GRAY = 2
+    BLACK = 3
+    def findOrderDfs(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        course_dict = collections.defaultdict(list)
+        for next_course, prev_course in prerequisites:
+            course_dict[prev_course].append(next_course)
+        possible = True
+        color = {k: Solution.WHITE for k in range(numCourses)} #其实代表的是是否visit，这里用数字来说话，可读性有点不好，但是这里就把点的状态generalize了，就不是几个list来表示了
+        stack = []
+        def dfs(cur:int):
+            nonlocal possible #py3才有的，py2似乎只能用global之类的
+            if not possible:
+                return #这里不使用boolreturn了，直接什么都不返回
+            color[cur] = Solution.GRAY
+            if cur in course_dict: #可能并没有前置课程，所以可能不在dict当中
+                for next_course in course_dict[cur]:
+                    if color[next_course] == Solution.WHITE:
+                        dfs(next_course)
+                    elif color[next_course] == Solution.GRAY:
+                        possible = False
+                        return
+                    #如果是黑的，临节点计算过了，并不直接返回，而是意味着这个分支处理过了，当前节点直接处理就可以了
+            color[cur] = Solution.BLACK
+            stack.append(cur)
+        
+        for i in range(numCourses):  
+            if color[i] == Solution.WHITE:
+                dfs(i)
+        if not possible:
+            return []
+        return stack[::-1]
+    
