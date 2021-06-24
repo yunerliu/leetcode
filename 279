@@ -1,0 +1,35 @@
+class Solution:
+    def numSquaresOne(self, n: int) -> int:
+        square_nums = [i**2 for i in range(int(math.sqrt(n)) + 1)] #求平方根语法，range左闭右开
+        
+        dp = [float('inf')] * (n + 1) #无穷最大值
+        dp[0] = 0 #从语义上说，表示和为0的完美平方数的个数为0个，而且从实际计算来说是符合的
+        for i in range(1, n + 1): #左闭右开    
+            for square in square_nums:
+                if i < square:
+                    break#只调出一层循环，当前这层的计算完了
+                dp[i] = min(dp[i], dp[i- square] + 1) #因为可能有多个square来对比，所以要保留跟dp[i]的对比
+        return dp[-1] #从右边数第一个
+
+    def __init__(self, value, step = 0): #默认设置step为0
+        self.value = value
+        self.step = step
+        
+class Solution:
+    def numSquaresTwo(self, n: int) -> int:
+        squares = [i**2 for i in range(1, int(math.sqrt(n)) + 1)] #因为左闭右开，所以要从1开始，否则0会被算进去，所以右边要加1
+        queue = collections.deque([Node(n)]) #初始化的时候都要设置list？[]
+        visit = set([n]) #如果初始化没有添加[]会报错要可以迭代的
+        while queue:
+            cur = queue.popleft()
+            for s in squares:
+                new_node = Node(cur.value - s, cur.step + 1)
+                if new_node.value < 0:
+                    continue
+                elif new_node.value == 0:
+                    return new_node.step
+                elif new_node.value not in visit:
+                    visit.add(new_node.value)
+                    queue.append(new_node)
+        return -1
+
