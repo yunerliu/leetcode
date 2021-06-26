@@ -1,0 +1,41 @@
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        word_key = "$"
+        word_dict = {}
+        for word in words:
+            node = word_dict
+            for letter in word:
+                node = node.setdefault(letter, {}) #返回value，如果没有的话把value设置成默认值，然后返回
+            node[word_key] = word
+        
+        ret = []
+        rows = len(board)
+        cols = len(board[0])
+        
+        def backtracking(r, c, parent):
+            letter = board[r][c]
+            cur_node = parent[letter]
+            cur_word = cur_node.pop(word_key, False)
+            if cur_word:
+                ret.append(cur_word)
+            #这里不能return，因为其实是相当于把word list转化成了trie，单词长度是有可能覆盖的，比如oath， oathk， oathf，走一遍如果这里返回了，就不能搜索下面的了。
+            board[r][c] = "#"
+            for d in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                next_r = d[0] + r
+                next_c = d[1] + c
+                if next_r < 0 or next_r >= rows or next_c < 0 or next_c >= cols:
+                    continue
+                if board[next_r][next_c] not in cur_node:
+                    continue
+                backtracking(next_r, next_c, cur_node)
+            board[r][c] = letter
+            if not cur_node: #剪枝，这样下一回如果有相同的，直接就可以pass了？因为没有可找的东西了，适用于什么呢？最外层循环套着的部分。
+                parent.pop(letter) #dict去掉kv对
+            
+        
+        for i in range(rows):
+            for j in range(cols):
+                if board[i][j] in word_dict:
+                    backtracking(i, j, word_dict)
+        return ret
+                
